@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import LoginForm from "./components/LoginForm";
 
 interface FormData {
   name: string;
@@ -10,6 +11,7 @@ interface FormData {
 }
 
 export default function Home() {
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [formData, setFormData] = useState<FormData>({
     name: "",
     email: "",
@@ -70,11 +72,33 @@ export default function Home() {
     }
   };
 
+  const handleLoginSuccess = () => {
+    setIsAuthenticated(true);
+  };
+
+  const handleLogout = () => {
+    setIsAuthenticated(false);
+  };
+
+  // Show login form if not authenticated
+  if (!isAuthenticated) {
+    return <LoginForm onLoginSuccess={handleLoginSuccess} />;
+  }
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 py-12 px-4 sm:px-6 lg:px-8">
       <div className="max-w-md mx-auto bg-white rounded-xl shadow-md overflow-hidden md:max-w-2xl">
         <div className="md:flex">
           <div className="p-8 w-full">
+            {/* Logout button */}
+            <div className="flex justify-end mb-4">
+              <button
+                onClick={handleLogout}
+                className="text-sm text-indigo-600 hover:text-indigo-800 underline"
+              >
+                Logout
+              </button>
+            </div>
             <div className="uppercase tracking-wide text-sm text-indigo-500 font-semibold mb-1">
               Contact Form
             </div>

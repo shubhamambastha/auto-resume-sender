@@ -52,7 +52,7 @@ export default function SubmissionsPage() {
     if (isAuthenticated && !isLoading) {
       fetchSubmissions();
     }
-  }, [isAuthenticated, user, isLoading, supabase]); // Re-run effect if these dependencies change
+  }, [isAuthenticated, user, isLoading]); // Re-run effect if these dependencies change
 
   const handleLogout = async () => {
     await signOut();

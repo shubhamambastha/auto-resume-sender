@@ -3,6 +3,7 @@
 import { useState } from "react";
 import SupabaseAuthForm from "./components/SupabaseAuthForm";
 import { useSupabaseAuth } from "./hooks/useSupabaseAuth";
+import Link from "next/link";
 
 interface FormData {
   companyName: string;
@@ -128,12 +129,20 @@ export default function Home() {
               <span className="text-sm text-gray-600">
                 Welcome, {user?.email}
               </span>
-              <button
-                onClick={handleLogout}
-                className="text-sm text-indigo-600 hover:text-indigo-800 underline"
-              >
-                Logout
-              </button>
+              <div className="flex space-x-4">
+                <Link
+                  href="/submissions"
+                  className="text-sm text-indigo-600 hover:text-indigo-800 underline"
+                >
+                  View Submissions
+                </Link>
+                <button
+                  onClick={handleLogout}
+                  className="text-sm text-indigo-600 hover:text-indigo-800 underline"
+                >
+                  Logout
+                </button>
+              </div>
             </div>
             <div className="uppercase tracking-wide text-sm text-indigo-500 font-semibold mb-1">
               Contact Form

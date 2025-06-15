@@ -1,8 +1,8 @@
 "use client";
 
 import { useState } from "react";
-import LoginForm from "./components/LoginForm";
-import { useAuth } from "./hooks/useAuth";
+import SupabaseAuthForm from "./components/SupabaseAuthForm";
+import { useSupabaseAuth } from "./hooks/useSupabaseAuth";
 
 interface FormData {
   name: string;
@@ -12,7 +12,15 @@ interface FormData {
 }
 
 export default function Home() {
-  const { isAuthenticated, user, login, logout, isLoading } = useAuth();
+  const {
+    isAuthenticated,
+    user,
+    signIn,
+    signUp,
+    signOut,
+    resetPassword,
+    isLoading,
+  } = useSupabaseAuth();
   const [formData, setFormData] = useState<FormData>({
     name: "",
     email: "",
@@ -73,15 +81,12 @@ export default function Home() {
     }
   };
 
-  const handleLoginSuccess = async (
-    token: string,
-    userData: { email: string }
-  ) => {
-    await login(token, userData);
+  const handleAuthSuccess = () => {
+    // The auth state will be updated automatically by the Supabase auth listener
   };
 
-  const handleLogout = () => {
-    logout();
+  const handleLogout = async () => {
+    await signOut();
   };
 
   // Show loading spinner while checking authentication
@@ -98,7 +103,14 @@ export default function Home() {
 
   // Show login form if not authenticated
   if (!isAuthenticated) {
-    return <LoginForm onLoginSuccess={handleLoginSuccess} />;
+    return (
+      <SupabaseAuthForm
+        onAuthSuccess={handleAuthSuccess}
+        signIn={signIn}
+        signUp={signUp}
+        resetPassword={resetPassword}
+      />
+    );
   }
 
   return (

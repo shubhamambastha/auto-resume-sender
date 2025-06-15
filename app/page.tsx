@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import LoginForm from "./components/LoginForm";
+import { useAuth } from "./hooks/useAuth";
 
 interface FormData {
   name: string;
@@ -11,7 +12,7 @@ interface FormData {
 }
 
 export default function Home() {
-  const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const { isAuthenticated, user, login, logout, isLoading } = useAuth();
   const [formData, setFormData] = useState<FormData>({
     name: "",
     email: "",
@@ -72,13 +73,28 @@ export default function Home() {
     }
   };
 
-  const handleLoginSuccess = () => {
-    setIsAuthenticated(true);
+  const handleLoginSuccess = async (
+    token: string,
+    userData: { email: string }
+  ) => {
+    await login(token, userData);
   };
 
   const handleLogout = () => {
-    setIsAuthenticated(false);
+    logout();
   };
+
+  // Show loading spinner while checking authentication
+  if (isLoading) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-indigo-600 mx-auto"></div>
+          <p className="mt-4 text-gray-600">Loading...</p>
+        </div>
+      </div>
+    );
+  }
 
   // Show login form if not authenticated
   if (!isAuthenticated) {
@@ -90,8 +106,11 @@ export default function Home() {
       <div className="max-w-md mx-auto bg-white rounded-xl shadow-md overflow-hidden md:max-w-2xl">
         <div className="md:flex">
           <div className="p-8 w-full">
-            {/* Logout button */}
-            <div className="flex justify-end mb-4">
+            {/* User info and logout button */}
+            <div className="flex justify-between items-center mb-4">
+              <span className="text-sm text-gray-600">
+                Welcome, {user?.email}
+              </span>
               <button
                 onClick={handleLogout}
                 className="text-sm text-indigo-600 hover:text-indigo-800 underline"

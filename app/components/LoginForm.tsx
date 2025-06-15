@@ -2,8 +2,12 @@
 
 import { useState } from "react";
 
+interface User {
+  email: string;
+}
+
 interface LoginFormProps {
-  onLoginSuccess: () => void;
+  onLoginSuccess: (token: string, user: User) => void;
 }
 
 export default function LoginForm({ onLoginSuccess }: LoginFormProps) {
@@ -42,9 +46,9 @@ export default function LoginForm({ onLoginSuccess }: LoginFormProps) {
 
       const result = await response.json();
 
-      if (response.ok) {
+      if (response.ok && result.success) {
         setLoginStatus("success");
-        onLoginSuccess();
+        onLoginSuccess(result.token, result.user);
       } else {
         setLoginStatus("error");
         setErrorMessage(result.error || "Login failed");

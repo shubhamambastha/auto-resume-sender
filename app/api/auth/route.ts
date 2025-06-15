@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
+import { generateToken } from "../../lib/jwt";
 
 // Hardcoded credentials
 const VALID_EMAIL = "admin@example.com";
@@ -18,8 +19,16 @@ export async function POST(request: NextRequest) {
 
     // Check credentials
     if (email === VALID_EMAIL && password === VALID_PASSWORD) {
+      // Generate JWT token
+      const token = await generateToken(email);
+
       return NextResponse.json(
-        { message: "Login successful", success: true },
+        {
+          message: "Login successful",
+          success: true,
+          token: token,
+          user: { email: email },
+        },
         { status: 200 }
       );
     } else {

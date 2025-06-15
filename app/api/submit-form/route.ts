@@ -1,10 +1,11 @@
 import { NextRequest, NextResponse } from "next/server";
 
 interface FormData {
-  name: string;
-  email: string;
-  phone?: string;
-  message: string;
+  companyName: string;
+  hrName?: string;
+  hrEmail: string;
+  positionAppliedFor: string;
+  resumeType: string;
 }
 
 export async function POST(request: NextRequest) {
@@ -12,19 +13,27 @@ export async function POST(request: NextRequest) {
     // Parse the JSON body
     const body: FormData = await request.json();
 
-    // Basic validation
-    if (!body.name || !body.email || !body.message) {
+    // Basic validation for required fields
+    if (
+      !body.companyName ||
+      !body.hrEmail ||
+      !body.positionAppliedFor ||
+      !body.resumeType
+    ) {
       return NextResponse.json(
-        { error: "Name, email, and message are required fields" },
+        {
+          error:
+            "company name, HR/company email, position applied for, and resume type are required fields",
+        },
         { status: 400 }
       );
     }
 
-    // Email validation (basic)
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    if (!emailRegex.test(body.email)) {
+    // Email validation (basic) for HR/Company email
+    const hrEmailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!hrEmailRegex.test(body.hrEmail)) {
       return NextResponse.json(
-        { error: "Please provide a valid email address" },
+        { error: "Please provide a valid HR or company email address" },
         { status: 400 }
       );
     }
@@ -37,10 +46,11 @@ export async function POST(request: NextRequest) {
 
     // For now, we'll just log the data and return success
     console.log("Form submission received:", {
-      name: body.name,
-      email: body.email,
-      phone: body.phone || "Not provided",
-      message: body.message,
+      companyName: body.companyName,
+      hrName: body.hrName || "Not provided",
+      hrEmail: body.hrEmail,
+      positionAppliedFor: body.positionAppliedFor,
+      resumeType: body.resumeType,
       timestamp: new Date().toISOString(),
     });
 
@@ -49,7 +59,7 @@ export async function POST(request: NextRequest) {
 
     return NextResponse.json(
       {
-        message: `Thank you ${body.name}! Your message has been received and we'll get back to you soon.`,
+        message: `Thank you! Your message has been received and we'll get back to you soon.`,
         success: true,
       },
       { status: 200 }

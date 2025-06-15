@@ -5,10 +5,11 @@ import SupabaseAuthForm from "./components/SupabaseAuthForm";
 import { useSupabaseAuth } from "./hooks/useSupabaseAuth";
 
 interface FormData {
-  name: string;
-  email: string;
-  phone: string;
-  message: string;
+  companyName: string;
+  hrName: string;
+  hrEmail: string;
+  positionAppliedFor: string;
+  resumeType: string;
 }
 
 export default function Home() {
@@ -22,10 +23,11 @@ export default function Home() {
     isLoading,
   } = useSupabaseAuth();
   const [formData, setFormData] = useState<FormData>({
-    name: "",
-    email: "",
-    phone: "",
-    message: "",
+    companyName: "",
+    hrName: "",
+    hrEmail: "",
+    positionAppliedFor: "",
+    resumeType: "",
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitStatus, setSubmitStatus] = useState<
@@ -34,7 +36,9 @@ export default function Home() {
   const [responseMessage, setResponseMessage] = useState("");
 
   const handleInputChange = (
-    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
+    e: React.ChangeEvent<
+      HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement
+    >
   ) => {
     const { name, value } = e.target;
     setFormData((prev) => ({
@@ -64,10 +68,11 @@ export default function Home() {
         setResponseMessage(result.message);
         // Reset form on success
         setFormData({
-          name: "",
-          email: "",
-          phone: "",
-          message: "",
+          companyName: "",
+          hrName: "",
+          hrEmail: "",
+          positionAppliedFor: "",
+          resumeType: "",
         });
       } else {
         setSubmitStatus("error");
@@ -144,79 +149,104 @@ export default function Home() {
             <form onSubmit={handleSubmit} className="mt-6 space-y-6">
               <div>
                 <label
-                  htmlFor="name"
+                  htmlFor="companyName"
                   className="block text-sm font-medium text-gray-700"
                 >
-                  Full Name *
+                  Company Name *
                 </label>
                 <input
                   type="text"
-                  id="name"
-                  name="name"
+                  id="companyName"
+                  name="companyName"
                   required
-                  value={formData.name}
+                  value={formData.companyName}
                   onChange={handleInputChange}
                   className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 text-gray-900 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
-                  placeholder="Enter your full name"
+                  placeholder="Enter company name"
                 />
               </div>
 
               <div>
                 <label
-                  htmlFor="email"
+                  htmlFor="hrName"
                   className="block text-sm font-medium text-gray-700"
                 >
-                  Email Address *
+                  HR Name
+                </label>
+                <input
+                  type="text"
+                  id="hrName"
+                  name="hrName"
+                  value={formData.hrName}
+                  onChange={handleInputChange}
+                  className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 text-gray-900 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+                  placeholder="Enter HR's name"
+                />
+              </div>
+
+              <div>
+                <label
+                  htmlFor="hrEmail"
+                  className="block text-sm font-medium text-gray-700"
+                >
+                  HR or Company Email *
                 </label>
                 <input
                   type="email"
-                  id="email"
-                  name="email"
+                  id="hrEmail"
+                  name="hrEmail"
                   required
-                  value={formData.email}
+                  value={formData.hrEmail}
                   onChange={handleInputChange}
                   className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 text-gray-900 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
-                  placeholder="Enter your email address"
+                  placeholder="Enter HR or company email"
                 />
               </div>
 
               <div>
                 <label
-                  htmlFor="phone"
+                  htmlFor="positionAppliedFor"
                   className="block text-sm font-medium text-gray-700"
                 >
-                  Phone Number
+                  Position Applied For *
                 </label>
                 <input
-                  type="tel"
-                  id="phone"
-                  name="phone"
-                  value={formData.phone}
+                  type="text"
+                  id="positionAppliedFor"
+                  name="positionAppliedFor"
+                  required
+                  value={formData.positionAppliedFor}
                   onChange={handleInputChange}
                   className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 text-gray-900 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
-                  placeholder="Enter your phone number"
+                  placeholder="Enter position applied for"
                 />
               </div>
 
               <div>
                 <label
-                  htmlFor="message"
+                  htmlFor="resumeType"
                   className="block text-sm font-medium text-gray-700"
                 >
-                  Message *
+                  Resume Type *
                 </label>
-                <textarea
-                  id="message"
-                  name="message"
+                <select
+                  id="resumeType"
+                  name="resumeType"
                   required
-                  rows={4}
-                  value={formData.message}
+                  value={formData.resumeType}
                   onChange={handleInputChange}
-                  className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 text-gray-900 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
-                  placeholder="Enter your message"
-                />
+                  className="mt-1 block w-full pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm rounded-md"
+                >
+                  <option value="" disabled>
+                    Select a resume type
+                  </option>
+                  <option value="software-engineer">Software Engineer</option>
+                  <option value="product-manager">Product Manager</option>
+                  <option value="data-scientist">Data Scientist</option>
+                  <option value="ui-ux-designer">UI/UX Designer</option>
+                  <option value="other">Other</option>
+                </select>
               </div>
-
               {/* Status Messages */}
               {submitStatus === "success" && (
                 <div className="rounded-md bg-green-50 p-4">

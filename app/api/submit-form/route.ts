@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
+import { supabase } from "@/app/lib/supabase";
 
 interface FormData {
   companyName: string;
@@ -56,6 +57,27 @@ export async function POST(request: NextRequest) {
 
     // Simulate some processing time
     await new Promise((resolve) => setTimeout(resolve, 1000));
+
+    // Insert data into Supabase
+    const { data, error } = await supabase.from("submissions").insert([
+      {
+        company_name: body.companyName,
+        hr_name: body.hrName,
+        hr_email: body.hrEmail,
+        position_applied_for: body.positionAppliedFor,
+        resume_type: body.resumeType,
+      },
+    ]);
+
+    if (error) {
+      console.error("Error inserting data into Supabase:", error);
+      return NextResponse.json(
+        { error: "Failed to save submission. Please try again later." },
+        { status: 500 }
+      );
+    }
+
+    console.log("Data successfully saved to Supabase:", data);
 
     return NextResponse.json(
       {

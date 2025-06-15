@@ -4,6 +4,12 @@ const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || "your-supabase-url";
 const supabaseAnonKey =
   process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || "your-supabase-anon-key";
 
+if (!supabaseUrl || !supabaseAnonKey) {
+  throw new Error(
+    "Missing Supabase URL or Anon Key. Check your .env.local file."
+  );
+}
+
 export const supabase = createClient(supabaseUrl, supabaseAnonKey);
 
 // Auth helper types

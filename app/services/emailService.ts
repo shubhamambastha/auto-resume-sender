@@ -148,7 +148,7 @@ export async function sendApplicationEmail(body: FormData) {
       from: process.env.EMAIL_USER,
       to: body.hrEmail,
       subject: emailSubject,
-      text: emailText,
+      html: emailText,
       attachments: resumeAttachment ? [resumeAttachment] : [],
     });
     console.log(SUCCESS_MESSAGES.EMAIL_SENT);

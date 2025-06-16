@@ -27,56 +27,41 @@ export const EMAIL_TEMPLATES = {
       companyName: string;
       resumeType: string;
     }) => `
-    <div dir="ltr">
-      <div>
-        <div>
-          <div>
-            <div>
-              <div>
-                <div>Hi ${
-                  data.hrName && data.hrName !== "" ? data.hrName : "there"
-                },</div>
-                <div>
-                  <div dir="auto">I came across your LinkedIn post about the hiring of a&nbsp;<span style="color:rgba(0,0,0,0.9);font-family:-apple-system,system-ui,BlinkMacSystemFont,'Segoe UI',Roboto,'Helvetica Neue','Fira Sans',Ubuntu,Oxygen,'Oxygen Sans',Cantarell,'Droid Sans','Apple Color Emoji','Segoe UI Emoji','Segoe UI Emoji','Segoe UI Symbol','Lucida Grande',Helvetica,Arial,sans-serif;font-size:14px">${
-                    data.positionAppliedFor
-                  }</span>&nbsp;at&nbsp;<span style="color:rgba(0,0,0,0.9);font-family:-apple-system,system-ui,BlinkMacSystemFont,'Segoe UI',Roboto,'Helvetica Neue','Fira Sans',Ubuntu,Oxygen,'Oxygen Sans',Cantarell,'Droid Sans','Apple Color Emoji','Segoe UI Emoji','Segoe UI Emoji','Segoe UI Symbol','Lucida Grande',Helvetica,Arial,sans-serif;font-size:14px">${
+    <!DOCTYPE html>
+    <html>
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    </head>
+    <body>
+        <div class="container">
+            <h1>Hi ${
+              data.hrName && data.hrName !== "" ? data.hrName : "there"
+            },</h1>
+
+            <p>I came across your LinkedIn post about the hiring of a <strong>${
+              data.positionAppliedFor
+            }</strong> at <strong>${
       data.companyName
-    }</span>. I am very interested in this opportunity and believe my background makes me a strong candidate. With over 5+ years of experience in ${getSkillAreaFromResumeType(
+    }</strong>. I am very interested in this opportunity and believe my background makes me a strong candidate. With over 5+ years of experience in ${getSkillAreaFromResumeType(
       data.resumeType
-    )}, including team lead expertise, I have honed my skills in building scalable, high-performance web applications.&nbsp;</div>
-                  <div dir="auto">I have attached my resume for your review. I would love to discuss how my experience and skills align with the needs of your team.&nbsp;</div>
-                  <div dir="auto">Looking forward to the possibility of working together.</div>
-                </div>
-              </div>
+    )}, including team lead expertise, I have honed my skills in building scalable, high-performance web applications.</p>
+
+            <p>I have attached my resume for your review. I would love to discuss how my experience and skills align with the needs of your team.</p>
+
+            <p>Looking forward to the possibility of working together.</p>
+
+            <div class="footer">
+                <p>Best regards,</p>
+                <p>
+                    Shubham Ambastha
+                    <br>
+                    +91-8602167858
+                </p>
             </div>
-            <font color="#888888">
-              <font color="#888888">
-                <font color="#888888">
-                  <font color="#888888"></font>
-                </font>
-              </font>
-            </font>
-          </div>
-          <font color="#888888">
-            <font color="#888888">
-              <font color="#888888"></font>
-            </font>
-          </font>
         </div>
-        <font color="#888888">
-          <font color="#888888"></font>
-        </font>
-      </div>
-      <font color="#888888">
-        <div><br></div>
-        <span class="gmail_signature_prefix">-- </span><br>
-                 <div dir="ltr" class="gmail_signature" data-smartmail="gmail_signature">
-           <div dir="ltr">
-              <i>Shubham Ambastha<br>+91-8602167858</i>
-           </div>
-         </div>
-      </font>
-    </div>
+    </body>
+    </html>
     `,
   },
 } as const;

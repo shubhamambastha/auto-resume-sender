@@ -48,11 +48,22 @@ npm install
 Create a `.env.local` file in the root directory:
 
 ```env
-NEXT_PUBLIC_SUPABASE_URL=your-supabase-project-url
+NEXT_PUBLIC_SUPABASE_URL=https://your-project-id.supabase.co
 NEXT_PUBLIC_SUPABASE_ANON_KEY=your-supabase-anon-key
+
+# Email Configuration (optional)
+EMAIL_HOST=smtp.gmail.com
+EMAIL_PORT=587
+EMAIL_SECURE=false
+EMAIL_USER=your-email@gmail.com
+EMAIL_PASS=your-app-password
 ```
 
-Replace the values with your actual Supabase project credentials.
+**Important**: Replace the values with your actual Supabase project credentials:
+
+- Get your project URL from your Supabase dashboard (Settings → API)
+- Get your anon/public key from the same location
+- The URL should look like: `https://abcdefghijk.supabase.co`
 
 ### 4. Run the Application
 

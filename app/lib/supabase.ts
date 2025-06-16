@@ -1,14 +1,26 @@
 import { createClient } from "@supabase/supabase-js";
-import { ENV_KEYS, DEFAULT_VALUES } from "@/app/constants";
 
-const supabaseUrl =
-  process.env[ENV_KEYS.SUPABASE.URL] || DEFAULT_VALUES.SUPABASE.URL;
-const supabaseAnonKey =
-  process.env[ENV_KEYS.SUPABASE.ANON_KEY] || DEFAULT_VALUES.SUPABASE.ANON_KEY;
+const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
+const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!;
 
+// Validate that we have proper values (not just the default placeholders)
 if (!supabaseUrl || !supabaseAnonKey) {
+  throw new Error("Missing Supabase URL or Anon Key. Check your .env file.");
+}
+
+// Additional validation to ensure the URL is properly formatted
+if (
+  supabaseUrl.includes("your-project-id") ||
+  supabaseUrl === "your-supabase-url"
+) {
   throw new Error(
-    "Missing Supabase URL or Anon Key. Check your .env.local file."
+    "Please update your NEXT_PUBLIC_SUPABASE_URL in .env with your actual Supabase project URL."
+  );
+}
+
+if (supabaseAnonKey === "your-supabase-anon-key") {
+  throw new Error(
+    "Please update your NEXT_PUBLIC_SUPABASE_ANON_KEY in .env with your actual Supabase anonymous key."
   );
 }
 

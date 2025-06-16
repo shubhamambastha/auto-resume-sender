@@ -10,8 +10,6 @@ import {
   SUCCESS_MESSAGES,
   WARNING_MESSAGES,
   FILE_CONSTANTS,
-  ENV_KEYS,
-  DEFAULT_VALUES,
 } from "@/app/constants";
 
 // Function to convert Google Drive view URL to direct download URL
@@ -30,12 +28,12 @@ function convertGoogleDriveUrl(url: string): string {
 
 // Nodemailer transporter setup (using environment variables)
 const transporter = nodemailer.createTransport({
-  host: process.env[ENV_KEYS.EMAIL.HOST],
-  port: parseInt(process.env[ENV_KEYS.EMAIL.PORT] || DEFAULT_VALUES.EMAIL.PORT),
-  secure: process.env[ENV_KEYS.EMAIL.SECURE] === "true",
+  host: process.env.EMAIL_HOST,
+  port: parseInt(process.env.EMAIL_PORT || "587"),
+  secure: process.env.EMAIL_SECURE === "true",
   auth: {
-    user: process.env[ENV_KEYS.EMAIL.USER],
-    pass: process.env[ENV_KEYS.EMAIL.PASS],
+    user: process.env.EMAIL_USER,
+    pass: process.env.EMAIL_PASS,
   },
 });
 
@@ -147,7 +145,7 @@ export async function sendApplicationEmail(body: FormData) {
 
   try {
     await transporter.sendMail({
-      from: process.env[ENV_KEYS.EMAIL.USER],
+      from: process.env.EMAIL_USER,
       to: body.hrEmail,
       subject: emailSubject,
       text: emailText,

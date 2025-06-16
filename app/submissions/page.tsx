@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { useSupabaseAuth } from "../hooks/useSupabaseAuth";
 import { useResumeTypes } from "../hooks/useResumeTypes";
 import { supabase } from "../lib/supabase"; // Import the existing Supabase client
+import StatusMessage from "../components/ui/StatusMessage";
 import Link from "next/link"; // Import Link for navigation
 
 // Define the interface for your submission data
@@ -134,25 +135,9 @@ export default function SubmissionsPage() {
               <p className="mt-4 text-gray-600">Loading submissions...</p>
             </div>
           ) : error ? (
-            <div className="rounded-md bg-red-50 p-4">
-              <div className="flex">
-                <div className="ml-3">
-                  <p className="text-sm font-medium text-red-800">
-                    Error: {error}
-                  </p>
-                </div>
-              </div>
-            </div>
+            <StatusMessage type="error" message={error} />
           ) : submissions.length === 0 ? (
-            <div className="rounded-md bg-yellow-50 p-4">
-              <div className="flex">
-                <div className="ml-3">
-                  <p className="text-sm font-medium text-yellow-800">
-                    No submissions found.
-                  </p>
-                </div>
-              </div>
-            </div>
+            <StatusMessage type="warning" message="No submissions found." />
           ) : (
             // Display submissions in a responsive table
             <div className="overflow-x-auto">

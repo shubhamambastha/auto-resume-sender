@@ -4,6 +4,10 @@ import { useState } from "react";
 import SupabaseAuthForm from "./SupabaseAuthForm";
 import { useSupabaseAuth } from "../hooks/useSupabaseAuth";
 import { useResumeTypes } from "../hooks/useResumeTypes";
+import FormContainer from "./ui/FormContainer";
+import FormField from "./ui/FormField";
+import StatusMessage from "./ui/StatusMessage";
+import Button from "./ui/Button";
 import Link from "next/link";
 
 interface FormData {
@@ -125,193 +129,125 @@ export default function HomePage() {
     );
   }
 
+  // Prepare resume type options for the select field
+  const resumeTypeOptions = resumeTypes.map((resumeType) => ({
+    value: resumeType.name,
+    label: resumeType.display_name,
+    title: resumeType.description || undefined,
+  }));
+
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 py-12 px-4 sm:px-6 lg:px-8">
-      <div className="max-w-md mx-auto bg-white rounded-xl shadow-md overflow-hidden md:max-w-2xl">
-        <div className="md:flex">
-          <div className="p-8 w-full">
-            {/* User info and logout button */}
-            <div className="flex justify-between items-center mb-4">
-              <span className="text-sm text-gray-600">
-                Welcome, {user?.email}
-              </span>
-              <div className="flex space-x-4">
-                <Link
-                  href="/submissions"
-                  className="text-sm text-indigo-600 hover:text-indigo-800 underline"
-                >
-                  View Submissions
-                </Link>
-                <button
-                  onClick={handleLogout}
-                  className="text-sm text-indigo-600 hover:text-indigo-800 underline"
-                >
-                  Logout
-                </button>
-              </div>
-            </div>
-            <div className="uppercase tracking-wide text-sm text-indigo-500 font-semibold mb-1">
-              Contact Form
-            </div>
-            <h1 className="block mt-1 text-lg leading-tight font-medium text-black">
-              Get in Touch With Us
-            </h1>
-            <p className="mt-2 text-gray-500">
-              Fill out the form below and we&apos;ll get back to you as soon as
-              possible.
-            </p>
-
-            <form onSubmit={handleSubmit} className="mt-6 space-y-6">
-              <div>
-                <label
-                  htmlFor="companyName"
-                  className="block text-sm font-medium text-gray-700"
-                >
-                  Company Name *
-                </label>
-                <input
-                  type="text"
-                  id="companyName"
-                  name="companyName"
-                  required
-                  value={formData.companyName}
-                  onChange={handleInputChange}
-                  className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 text-gray-900 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
-                  placeholder="Enter company name"
-                />
-              </div>
-
-              <div>
-                <label
-                  htmlFor="hrName"
-                  className="block text-sm font-medium text-gray-700"
-                >
-                  HR Name
-                </label>
-                <input
-                  type="text"
-                  id="hrName"
-                  name="hrName"
-                  value={formData.hrName}
-                  onChange={handleInputChange}
-                  className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 text-gray-900 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
-                  placeholder="Enter HR's name"
-                />
-              </div>
-
-              <div>
-                <label
-                  htmlFor="hrEmail"
-                  className="block text-sm font-medium text-gray-700"
-                >
-                  HR or Company Email *
-                </label>
-                <input
-                  type="email"
-                  id="hrEmail"
-                  name="hrEmail"
-                  required
-                  value={formData.hrEmail}
-                  onChange={handleInputChange}
-                  className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 text-gray-900 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
-                  placeholder="Enter HR or company email"
-                />
-              </div>
-
-              <div>
-                <label
-                  htmlFor="positionAppliedFor"
-                  className="block text-sm font-medium text-gray-700"
-                >
-                  Position Applied For *
-                </label>
-                <input
-                  type="text"
-                  id="positionAppliedFor"
-                  name="positionAppliedFor"
-                  required
-                  value={formData.positionAppliedFor}
-                  onChange={handleInputChange}
-                  className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 text-gray-900 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
-                  placeholder="Enter position applied for"
-                />
-              </div>
-
-              <div>
-                <label
-                  htmlFor="resumeType"
-                  className="block text-sm font-medium text-gray-700"
-                >
-                  Resume Type *
-                </label>
-                {resumeTypesError && (
-                  <div className="mb-2 text-sm text-red-600">
-                    Error loading resume types: {resumeTypesError}
-                  </div>
-                )}
-                <select
-                  id="resumeType"
-                  name="resumeType"
-                  required
-                  value={formData.resumeType}
-                  onChange={handleInputChange}
-                  disabled={resumeTypesLoading}
-                  className="mt-1 block w-full pl-3 pr-10 py-2 text-base border border-gray-300 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm rounded-md text-gray-900 disabled:opacity-50 disabled:cursor-not-allowed"
-                >
-                  <option value="" disabled>
-                    {resumeTypesLoading
-                      ? "Loading resume types..."
-                      : "Select a resume type"}
-                  </option>
-                  {resumeTypes.map((resumeType) => (
-                    <option
-                      key={resumeType.id}
-                      value={resumeType.name}
-                      title={resumeType.description || undefined}
-                    >
-                      {resumeType.display_name}
-                    </option>
-                  ))}
-                </select>
-              </div>
-              {/* Status Messages */}
-              {submitStatus === "success" && (
-                <div className="rounded-md bg-green-50 p-4">
-                  <div className="flex">
-                    <div className="ml-3">
-                      <p className="text-sm font-medium text-green-800">
-                        Success! {responseMessage}
-                      </p>
-                    </div>
-                  </div>
-                </div>
-              )}
-
-              {submitStatus === "error" && (
-                <div className="rounded-md bg-red-50 p-4">
-                  <div className="flex">
-                    <div className="ml-3">
-                      <p className="text-sm font-medium text-red-800">
-                        Error: {responseMessage}
-                      </p>
-                    </div>
-                  </div>
-                </div>
-              )}
-
-              <div>
-                <button
-                  type="submit"
-                  disabled={isSubmitting}
-                  className="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 disabled:opacity-50 disabled:cursor-not-allowed"
-                >
-                  {isSubmitting ? "Submitting..." : "Submit Form"}
-                </button>
-              </div>
-            </form>
-          </div>
+    <FormContainer
+      maxWidth="2xl"
+      subtitle="Contact Form"
+      title="Get in Touch With Us"
+      description="Fill out the form below and we'll get back to you as soon as possible."
+    >
+      {/* User info and logout button */}
+      <div className="flex justify-between items-center mb-4">
+        <span className="text-sm text-gray-600">Welcome, {user?.email}</span>
+        <div className="flex space-x-4">
+          <Link
+            href="/submissions"
+            className="text-sm text-indigo-600 hover:text-indigo-800 underline"
+          >
+            View Submissions
+          </Link>
+          <button
+            onClick={handleLogout}
+            className="text-sm text-indigo-600 hover:text-indigo-800 underline"
+          >
+            Logout
+          </button>
         </div>
       </div>
-    </div>
+
+      <form onSubmit={handleSubmit} className="space-y-6">
+        <FormField
+          id="companyName"
+          name="companyName"
+          label="Company Name"
+          type="text"
+          required
+          value={formData.companyName}
+          onChange={handleInputChange}
+          placeholder="Enter company name"
+        />
+
+        <FormField
+          id="hrName"
+          name="hrName"
+          label="HR Name"
+          type="text"
+          value={formData.hrName}
+          onChange={handleInputChange}
+          placeholder="Enter HR's name"
+        />
+
+        <FormField
+          id="hrEmail"
+          name="hrEmail"
+          label="HR or Company Email"
+          type="email"
+          required
+          value={formData.hrEmail}
+          onChange={handleInputChange}
+          placeholder="Enter HR or company email"
+        />
+
+        <FormField
+          id="positionAppliedFor"
+          name="positionAppliedFor"
+          label="Position Applied For"
+          type="text"
+          required
+          value={formData.positionAppliedFor}
+          onChange={handleInputChange}
+          placeholder="Enter position applied for"
+        />
+
+        <div>
+          {resumeTypesError && (
+            <StatusMessage
+              type="error"
+              message={`Error loading resume types: ${resumeTypesError}`}
+              className="mb-4"
+            />
+          )}
+          <FormField
+            id="resumeType"
+            name="resumeType"
+            label="Resume Type"
+            type="select"
+            required
+            value={formData.resumeType}
+            onChange={handleInputChange}
+            disabled={resumeTypesLoading}
+            options={resumeTypeOptions}
+            loadingText={
+              resumeTypesLoading ? "Loading resume types..." : undefined
+            }
+          />
+        </div>
+
+        {/* Status Messages */}
+        {submitStatus === "success" && (
+          <StatusMessage type="success" message={responseMessage} />
+        )}
+
+        {submitStatus === "error" && (
+          <StatusMessage type="error" message={responseMessage} />
+        )}
+
+        <Button
+          type="submit"
+          isLoading={isSubmitting}
+          loadingText="Submitting..."
+          fullWidth
+        >
+          Submit Form
+        </Button>
+      </form>
+    </FormContainer>
   );
 }

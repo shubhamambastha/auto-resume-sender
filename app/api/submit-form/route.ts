@@ -2,6 +2,12 @@ import { NextRequest, NextResponse } from "next/server";
 import { supabase } from "@/app/lib/supabase";
 import { sendApplicationEmail } from "@/app/services/emailService";
 import { FormData } from "@/app/types/index";
+import {
+  ERROR_MESSAGES,
+  SUCCESS_MESSAGES,
+  REGEX_PATTERNS,
+  TIMEOUTS,
+} from "@/app/constants";
 
 export async function POST(request: NextRequest) {
   try {
@@ -17,18 +23,16 @@ export async function POST(request: NextRequest) {
     ) {
       return NextResponse.json(
         {
-          error:
-            "company name, HR/company email, position applied for, and resume type are required fields",
+          error: ERROR_MESSAGES.FORM_VALIDATION.REQUIRED_FIELDS,
         },
         { status: 400 }
       );
     }
 
     // Email validation (basic) for HR/Company email
-    const hrEmailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    if (!hrEmailRegex.test(body.hrEmail)) {
+    if (!REGEX_PATTERNS.EMAIL.test(body.hrEmail)) {
       return NextResponse.json(
-        { error: "Please provide a valid HR or company email address" },
+        { error: ERROR_MESSAGES.FORM_VALIDATION.INVALID_EMAIL },
         { status: 400 }
       );
     }
@@ -50,7 +54,9 @@ export async function POST(request: NextRequest) {
     });
 
     // Simulate some processing time
-    await new Promise((resolve) => setTimeout(resolve, 1000));
+    await new Promise((resolve) =>
+      setTimeout(resolve, TIMEOUTS.FORM_SUBMISSION_DELAY)
+    );
 
     // Insert data into Supabase
     const { data, error } = await supabase.from("submissions").insert([
@@ -66,7 +72,7 @@ export async function POST(request: NextRequest) {
     if (error) {
       console.error("Error inserting data into Supabase:", error);
       return NextResponse.json(
-        { error: "Failed to save submission. Please try again later." },
+        { error: ERROR_MESSAGES.DATABASE.SAVE_FAILED },
         { status: 500 }
       );
     }
@@ -80,7 +86,10 @@ export async function POST(request: NextRequest) {
       console.error("Email sending failed:", emailResult.error);
       return NextResponse.json(
         {
-          error: `Failed to send application email: ${emailResult.error}. Your submission has been saved, but please contact support.`,
+          error: ERROR_MESSAGES.EMAIL_PARTIAL_SUCCESS(
+            body.hrEmail,
+            emailResult.error as string
+          ),
           partialSuccess: true,
         },
         { status: 500 }
@@ -90,7 +99,7 @@ export async function POST(request: NextRequest) {
 
     return NextResponse.json(
       {
-        message: `Thank you! Your application has been submitted successfully and sent to ${body.hrEmail}.`,
+        message: SUCCESS_MESSAGES.APPLICATION_SUBMITTED(body.hrEmail),
         success: true,
       },
       { status: 200 }
@@ -99,7 +108,7 @@ export async function POST(request: NextRequest) {
     console.error("Error processing form submission:", error);
 
     return NextResponse.json(
-      { error: "Internal server error. Please try again later." },
+      { error: ERROR_MESSAGES.DATABASE.INTERNAL_ERROR },
       { status: 500 }
     );
   }

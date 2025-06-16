@@ -1,8 +1,10 @@
 import { createClient } from "@supabase/supabase-js";
+import { ENV_KEYS, DEFAULT_VALUES } from "@/app/constants";
 
-const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || "your-supabase-url";
+const supabaseUrl =
+  process.env[ENV_KEYS.SUPABASE.URL] || DEFAULT_VALUES.SUPABASE.URL;
 const supabaseAnonKey =
-  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || "your-supabase-anon-key";
+  process.env[ENV_KEYS.SUPABASE.ANON_KEY] || DEFAULT_VALUES.SUPABASE.ANON_KEY;
 
 if (!supabaseUrl || !supabaseAnonKey) {
   throw new Error(

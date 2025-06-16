@@ -1,16 +1,27 @@
 import nodemailer from "nodemailer";
 import { FormData } from "@/app/types/index"; // Import from the new types file
 import { supabase } from "@/app/lib/supabase";
+import {
+  EMAIL_TEMPLATES,
+  EMAIL_CONFIG,
+  REGEX_PATTERNS,
+  URL_TEMPLATES,
+  ERROR_MESSAGES,
+  SUCCESS_MESSAGES,
+  WARNING_MESSAGES,
+  FILE_CONSTANTS,
+  ENV_KEYS,
+  DEFAULT_VALUES,
+} from "@/app/constants";
 
 // Function to convert Google Drive view URL to direct download URL
 function convertGoogleDriveUrl(url: string): string {
   // Check if it's a Google Drive URL
-  const driveRegex = /https:\/\/drive\.google\.com\/file\/d\/([a-zA-Z0-9_-]+)/;
-  const match = url.match(driveRegex);
+  const match = url.match(REGEX_PATTERNS.GOOGLE_DRIVE_URL);
 
   if (match) {
     const fileId = match[1];
-    return `https://drive.google.com/uc?export=download&id=${fileId}`;
+    return URL_TEMPLATES.GOOGLE_DRIVE_DOWNLOAD(fileId);
   }
 
   // Return original URL if it's not a Google Drive URL
@@ -19,12 +30,12 @@ function convertGoogleDriveUrl(url: string): string {
 
 // Nodemailer transporter setup (using environment variables)
 const transporter = nodemailer.createTransport({
-  host: process.env.EMAIL_HOST,
-  port: parseInt(process.env.EMAIL_PORT || "587"),
-  secure: process.env.EMAIL_SECURE === "true",
+  host: process.env[ENV_KEYS.EMAIL.HOST],
+  port: parseInt(process.env[ENV_KEYS.EMAIL.PORT] || DEFAULT_VALUES.EMAIL.PORT),
+  secure: process.env[ENV_KEYS.EMAIL.SECURE] === "true",
   auth: {
-    user: process.env.EMAIL_USER,
-    pass: process.env.EMAIL_PASS,
+    user: process.env[ENV_KEYS.EMAIL.USER],
+    pass: process.env[ENV_KEYS.EMAIL.PASS],
   },
 });
 
@@ -39,12 +50,12 @@ export async function sendApplicationEmail(body: FormData) {
 
   if (resumeError) {
     console.error(
-      `Error fetching resume URL for ${body.resumeType}:`,
+      ERROR_MESSAGES.RESUME_FETCH_FAILED(body.resumeType, "database"),
       resumeError
     );
     return {
       success: false,
-      error: `Resume type '${body.resumeType}' not found`,
+      error: ERROR_MESSAGES.RESUME_NOT_FOUND(body.resumeType),
     };
   }
 
@@ -60,14 +71,16 @@ export async function sendApplicationEmail(body: FormData) {
       const response = await fetch(downloadUrl, {
         method: "GET",
         headers: {
-          "User-Agent":
-            "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36",
+          "User-Agent": EMAIL_CONFIG.HEADERS.USER_AGENT,
         },
       });
 
       if (!response.ok) {
         throw new Error(
-          `Failed to fetch resume from URL: ${response.status} ${response.statusText}`
+          ERROR_MESSAGES.RESUME_FETCH_HTTP_ERROR(
+            response.status,
+            response.statusText
+          )
         );
       }
 
@@ -75,24 +88,21 @@ export async function sendApplicationEmail(body: FormData) {
       const contentType = response.headers.get("content-type");
       if (
         contentType &&
-        !contentType.includes("application/pdf") &&
-        !contentType.includes("application/octet-stream")
+        !contentType.includes(EMAIL_CONFIG.CONTENT_TYPES.PDF) &&
+        !contentType.includes(EMAIL_CONFIG.CONTENT_TYPES.OCTET_STREAM)
       ) {
-        console.warn(
-          `Unexpected content type: ${contentType}. This might not be a direct download link.`
-        );
+        console.warn(WARNING_MESSAGES.UNEXPECTED_CONTENT_TYPE(contentType));
       }
 
-      const filename = `${body.companyName.replace(
-        /[^a-zA-Z0-9]/g,
-        "_"
-      )}-${body.positionAppliedFor.replace(/[^a-zA-Z0-9]/g, "_")}-${
+      const filename = FILE_CONSTANTS.RESUME_FILENAME(
+        body.companyName,
+        body.positionAppliedFor,
         body.resumeType
-      }-Resume.pdf`;
+      );
       const arrayBuffer = await response.arrayBuffer();
 
       if (arrayBuffer.byteLength === 0) {
-        throw new Error("Downloaded file is empty");
+        throw new Error(ERROR_MESSAGES.RESUME_EMPTY_FILE);
       }
 
       resumeAttachment = {
@@ -100,69 +110,53 @@ export async function sendApplicationEmail(body: FormData) {
         content: Buffer.from(arrayBuffer),
       };
       console.log(
-        `Resume attachment created successfully. Size: ${arrayBuffer.byteLength} bytes`
+        SUCCESS_MESSAGES.RESUME_ATTACHMENT_CREATED(arrayBuffer.byteLength)
       );
     } catch (fetchError) {
       console.error(
-        `Error fetching resume for ${body.resumeType} from ${resumeUrl}:`,
+        ERROR_MESSAGES.RESUME_FETCH_FAILED(body.resumeType, resumeUrl),
         fetchError
       );
       // Return error instead of continuing without attachment
       return {
         success: false,
-        error: `Failed to download resume: ${
+        error: `${ERROR_MESSAGES.RESUME_DOWNLOAD_FAILED}: ${
           fetchError instanceof Error ? fetchError.message : "Unknown error"
         }`,
       };
     }
   } else {
-    console.warn(
-      `No resume URL found for resume type: ${body.resumeType}. Email will be sent without an attachment.`
-    );
+    console.warn(WARNING_MESSAGES.NO_ATTACHMENT(body.resumeType));
     return {
       success: false,
-      error: `No resume URL found for resume type: ${body.resumeType}`,
+      error: ERROR_MESSAGES.RESUME_URL_NOT_FOUND(body.resumeType),
     };
   }
 
   // Construct email content with form variables
-  const emailSubject = `Application for ${body.positionAppliedFor} at ${body.companyName}`;
-  const emailText = `
-    Dear ${body.hrName && body.hrName !== "" ? body.hrName : "Hiring Manager"},
-  
-    I hope this email finds you well.
-  
-    I am writing to express my keen interest in the ${
-      body.positionAppliedFor
-    } position at ${
+  const emailSubject = EMAIL_TEMPLATES.APPLICATION.SUBJECT(
+    body.positionAppliedFor,
     body.companyName
-  }, as advertised. My skills and experience align well with the requirements outlined for this role.
-  
-    I have attached my resume, a "${
-      body.resumeType
-    }" type, for your review, which details my qualifications and accomplishments. I am confident that my background in [mention a relevant skill or area, e.g., software development, product management] would be a valuable asset to your team.
-  
-    Thank you for your time and consideration. I look forward to hearing from you soon regarding my application.
-  
-    Sincerely,
-    [Your Name/Your Full Name]
-    [Your Phone Number, Optional]
-    [Your LinkedIn Profile, Optional]
-    [Your Portfolio/Website, Optional]
-    `;
+  );
+  const emailText = EMAIL_TEMPLATES.APPLICATION.BODY({
+    hrName: body.hrName,
+    positionAppliedFor: body.positionAppliedFor,
+    companyName: body.companyName,
+    resumeType: body.resumeType,
+  });
 
   try {
     await transporter.sendMail({
-      from: process.env.EMAIL_USER,
+      from: process.env[ENV_KEYS.EMAIL.USER],
       to: body.hrEmail,
       subject: emailSubject,
       text: emailText,
       attachments: resumeAttachment ? [resumeAttachment] : [],
     });
-    console.log("Application email sent successfully!");
+    console.log(SUCCESS_MESSAGES.EMAIL_SENT);
     return { success: true };
   } catch (mailError) {
-    console.error("Error sending application email:", mailError);
+    console.error(ERROR_MESSAGES.EMAIL_SEND_FAILED, mailError);
     return { success: false, error: mailError };
   }
 }

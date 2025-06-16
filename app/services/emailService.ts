@@ -2,6 +2,21 @@ import nodemailer from "nodemailer";
 import { FormData } from "@/app/types/index"; // Import from the new types file
 import { supabase } from "@/app/lib/supabase";
 
+// Function to convert Google Drive view URL to direct download URL
+function convertGoogleDriveUrl(url: string): string {
+  // Check if it's a Google Drive URL
+  const driveRegex = /https:\/\/drive\.google\.com\/file\/d\/([a-zA-Z0-9_-]+)/;
+  const match = url.match(driveRegex);
+
+  if (match) {
+    const fileId = match[1];
+    return `https://drive.google.com/uc?export=download&id=${fileId}`;
+  }
+
+  // Return original URL if it's not a Google Drive URL
+  return url;
+}
+
 // Nodemailer transporter setup (using environment variables)
 const transporter = nodemailer.createTransport({
   host: process.env.EMAIL_HOST,
@@ -27,6 +42,10 @@ export async function sendApplicationEmail(body: FormData) {
       `Error fetching resume URL for ${body.resumeType}:`,
       resumeError
     );
+    return {
+      success: false,
+      error: `Resume type '${body.resumeType}' not found`,
+    };
   }
 
   const resumeUrl = resumeData?.link;
@@ -34,29 +53,76 @@ export async function sendApplicationEmail(body: FormData) {
 
   if (resumeUrl) {
     try {
-      const response = await fetch(resumeUrl);
+      // Convert Google Drive URL to direct download URL
+      const downloadUrl = convertGoogleDriveUrl(resumeUrl);
+      console.log(`Fetching resume from: ${downloadUrl}`);
+
+      const response = await fetch(downloadUrl, {
+        method: "GET",
+        headers: {
+          "User-Agent":
+            "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36",
+        },
+      });
+
       if (!response.ok) {
         throw new Error(
           `Failed to fetch resume from URL: ${response.status} ${response.statusText}`
         );
       }
-      const filename = `${body.companyName}-${body.positionAppliedFor}-${body.resumeType}-Resume.pdf`;
+
+      // Check if the response is actually a PDF
+      const contentType = response.headers.get("content-type");
+      if (
+        contentType &&
+        !contentType.includes("application/pdf") &&
+        !contentType.includes("application/octet-stream")
+      ) {
+        console.warn(
+          `Unexpected content type: ${contentType}. This might not be a direct download link.`
+        );
+      }
+
+      const filename = `${body.companyName.replace(
+        /[^a-zA-Z0-9]/g,
+        "_"
+      )}-${body.positionAppliedFor.replace(/[^a-zA-Z0-9]/g, "_")}-${
+        body.resumeType
+      }-Resume.pdf`;
       const arrayBuffer = await response.arrayBuffer();
+
+      if (arrayBuffer.byteLength === 0) {
+        throw new Error("Downloaded file is empty");
+      }
+
       resumeAttachment = {
         filename: filename,
         content: Buffer.from(arrayBuffer),
       };
+      console.log(
+        `Resume attachment created successfully. Size: ${arrayBuffer.byteLength} bytes`
+      );
     } catch (fetchError) {
       console.error(
         `Error fetching resume for ${body.resumeType} from ${resumeUrl}:`,
         fetchError
       );
-      // Decide if this error should prevent the email from being sent or just send without attachment
+      // Return error instead of continuing without attachment
+      return {
+        success: false,
+        error: `Failed to download resume: ${
+          fetchError instanceof Error ? fetchError.message : "Unknown error"
+        }`,
+      };
     }
   } else {
     console.warn(
       `No resume URL found for resume type: ${body.resumeType}. Email will be sent without an attachment.`
     );
+    return {
+      success: false,
+      error: `No resume URL found for resume type: ${body.resumeType}`,
+    };
   }
 
   // Construct email content with form variables

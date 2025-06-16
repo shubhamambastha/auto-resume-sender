@@ -77,14 +77,20 @@ export async function POST(request: NextRequest) {
     const emailResult = await sendApplicationEmail(body);
 
     if (!emailResult.success) {
-      console.error("Email sending failed, but Supabase save was successful.");
-      // Optionally, you could return a different status or message here if email failure is critical.
+      console.error("Email sending failed:", emailResult.error);
+      return NextResponse.json(
+        {
+          error: `Failed to send application email: ${emailResult.error}. Your submission has been saved, but please contact support.`,
+          partialSuccess: true,
+        },
+        { status: 500 }
+      );
     }
     // --- End Email Service Call ---
 
     return NextResponse.json(
       {
-        message: `Thank you! Your message has been received and we'll get back to you soon. Application email sent to ${body.hrEmail}.`,
+        message: `Thank you! Your application has been submitted successfully and sent to ${body.hrEmail}.`,
         success: true,
       },
       { status: 200 }

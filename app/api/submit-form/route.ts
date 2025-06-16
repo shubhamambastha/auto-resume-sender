@@ -1,13 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { supabase } from "@/app/lib/supabase";
-
-interface FormData {
-  companyName: string;
-  hrName?: string;
-  hrEmail: string;
-  positionAppliedFor: string;
-  resumeType: string;
-}
+import { sendApplicationEmail } from "@/app/services/emailService";
+import { FormData } from "@/app/types/index";
 
 export async function POST(request: NextRequest) {
   try {
@@ -79,9 +73,18 @@ export async function POST(request: NextRequest) {
 
     console.log("Data successfully saved to Supabase:", data);
 
+    // --- Call the new email service function ---
+    const emailResult = await sendApplicationEmail(body);
+
+    if (!emailResult.success) {
+      console.error("Email sending failed, but Supabase save was successful.");
+      // Optionally, you could return a different status or message here if email failure is critical.
+    }
+    // --- End Email Service Call ---
+
     return NextResponse.json(
       {
-        message: `Thank you! Your message has been received and we'll get back to you soon.`,
+        message: `Thank you! Your message has been received and we'll get back to you soon. Application email sent to ${body.hrEmail}.`,
         success: true,
       },
       { status: 200 }

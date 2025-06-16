@@ -5,10 +5,12 @@ A modern Next.js application with secure Supabase authentication and a beautiful
 ## 🚀 Features
 
 - **🔐 Supabase Authentication**: Complete auth system with login, signup, and password reset
+- **📊 Dynamic Resume Management**: Resume types are managed through the resumes table
 - **📱 Responsive Design**: Beautiful, modern UI that works on all devices
 - **🛡️ Secure**: JWT-based authentication with proper session management
 - **⚡ Real-time**: Automatic auth state synchronization
 - **🎨 Modern UI**: Clean, professional interface with Tailwind CSS
+- **📧 Email Integration**: Automatic email sending with resume attachments
 
 ## 🛠️ Setup Instructions
 
@@ -28,7 +30,14 @@ npm install
    - Create a new project
    - Note your project URL and anon key
 
-2. **Configure Authentication**:
+2. **Set up Database Tables**:
+
+   - Run the migration files in `app/db/migrations/` in order:
+     - `20250615_create_submissions_table.sql` - Creates the submissions table
+     - `20250116_create_resumes_table.sql` - Creates the resumes table for resume types
+   - The resumes table will be populated with default resume types
+
+3. **Configure Authentication**:
    - In your Supabase dashboard, go to Authentication → Settings
    - Configure your site URL (e.g., `http://localhost:3000` for development)
    - Enable email authentication
@@ -66,8 +75,20 @@ Open [http://localhost:3000](http://localhost:3000) to view the application.
 1. **Landing Page**: Users see the authentication form
 2. **Registration**: New users can create accounts with email verification
 3. **Login**: Existing users sign in and access the contact form
-4. **Contact Form**: Authenticated users can submit contact information
-5. **Logout**: Users can securely log out
+4. **Contact Form**: Authenticated users can submit contact information with dynamic resume type selection
+5. **Submissions View**: Users can view all their past submissions
+6. **Resume Management**: Resume types are dynamically loaded from the database
+7. **Logout**: Users can securely log out
+
+## 📊 Resume Management (resumes Table)
+
+The application uses a "resumes" table to manage different types of resumes:
+
+- **Dynamic Dropdown**: Resume types in the form are loaded from the database
+- **Links Management**: Each resume type has an associated link (e.g., Google Drive)
+- **API Endpoints**: Full CRUD operations available at `/api/resumes`
+- **Display Names**: User-friendly names for each resume type
+- **Active Status**: Resume types can be enabled/disabled
 
 ## 🛡️ Security Features
 

@@ -3,6 +3,7 @@
 import { useState } from "react";
 import SupabaseAuthForm from "./SupabaseAuthForm";
 import { useSupabaseAuth } from "../hooks/useSupabaseAuth";
+import { useResumeTypes } from "../hooks/useResumeTypes";
 import Link from "next/link";
 
 interface FormData {
@@ -23,6 +24,11 @@ export default function HomePage() {
     resetPassword,
     isLoading,
   } = useSupabaseAuth();
+  const {
+    resumeTypes,
+    isLoading: resumeTypesLoading,
+    error: resumeTypesError,
+  } = useResumeTypes();
   const [formData, setFormData] = useState<FormData>({
     companyName: "",
     hrName: "",
@@ -238,22 +244,34 @@ export default function HomePage() {
                 >
                   Resume Type *
                 </label>
+                {resumeTypesError && (
+                  <div className="mb-2 text-sm text-red-600">
+                    Error loading resume types: {resumeTypesError}
+                  </div>
+                )}
                 <select
                   id="resumeType"
                   name="resumeType"
                   required
                   value={formData.resumeType}
                   onChange={handleInputChange}
-                  className="mt-1 block w-full pl-3 pr-10 py-2 text-base border border-gray-300 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm rounded-md text-gray-900"
+                  disabled={resumeTypesLoading}
+                  className="mt-1 block w-full pl-3 pr-10 py-2 text-base border border-gray-300 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm rounded-md text-gray-900 disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   <option value="" disabled>
-                    Select a resume type
+                    {resumeTypesLoading
+                      ? "Loading resume types..."
+                      : "Select a resume type"}
                   </option>
-                  <option value="software-engineer">Software Engineer</option>
-                  <option value="product-manager">Product Manager</option>
-                  <option value="data-scientist">Data Scientist</option>
-                  <option value="ui-ux-designer">UI/UX Designer</option>
-                  <option value="other">Other</option>
+                  {resumeTypes.map((resumeType) => (
+                    <option
+                      key={resumeType.id}
+                      value={resumeType.name}
+                      title={resumeType.description || undefined}
+                    >
+                      {resumeType.display_name}
+                    </option>
+                  ))}
                 </select>
               </div>
               {/* Status Messages */}

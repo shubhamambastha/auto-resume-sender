@@ -1,5 +1,6 @@
 import nodemailer from "nodemailer";
 import { FormData } from "@/app/types/index"; // Import from the new types file
+import { supabase } from "@/app/lib/supabase";
 
 // Nodemailer transporter setup (using environment variables)
 const transporter = nodemailer.createTransport({
@@ -12,17 +13,23 @@ const transporter = nodemailer.createTransport({
   },
 });
 
-// Mapping for resume types to Google Drive URLs (MAKE SURE THESE ARE DIRECT DOWNLOAD LINKS)
-const resumeUrls: Record<string, string | undefined> = {
-  "software-engineer": process.env.RESUME_SOFTWARE_ENGINEER_URL,
-  "product-manager": process.env.RESUME_PRODUCT_MANAGER_URL,
-  "data-scientist": process.env.RESUME_DATA_SCIENTIST_URL,
-  "ui-ux-designer": process.env.RESUME_UI_UX_DESIGNER_URL,
-  other: process.env.RESUME_OTHER_URL,
-};
-
 export async function sendApplicationEmail(body: FormData) {
-  const resumeUrl = resumeUrls[body.resumeType];
+  // Fetch resume URL from resumes table
+  const { data: resumeData, error: resumeError } = await supabase
+    .from("resumes")
+    .select("link")
+    .eq("name", body.resumeType)
+    .eq("is_active", true)
+    .single();
+
+  if (resumeError) {
+    console.error(
+      `Error fetching resume URL for ${body.resumeType}:`,
+      resumeError
+    );
+  }
+
+  const resumeUrl = resumeData?.link;
   let resumeAttachment: { filename: string; content: Buffer } | undefined;
 
   if (resumeUrl) {

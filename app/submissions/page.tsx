@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { useSupabaseAuth } from "../hooks/useSupabaseAuth";
+import { useResumeTypes } from "../hooks/useResumeTypes";
 import { supabase } from "../lib/supabase"; // Import the existing Supabase client
 import Link from "next/link"; // Import Link for navigation
 
@@ -18,9 +19,16 @@ interface Submission {
 
 export default function SubmissionsPage() {
   const { isAuthenticated, user, isLoading, signOut } = useSupabaseAuth();
+  const { resumeTypes } = useResumeTypes();
   const [submissions, setSubmissions] = useState<Submission[]>([]);
   const [loadingSubmissions, setLoadingSubmissions] = useState(true);
   const [error, setError] = useState<string | null>(null);
+
+  // Function to get display name for resume type
+  const getResumeDisplayName = (resumeTypeName: string) => {
+    const resumeType = resumeTypes.find((rt) => rt.name === resumeTypeName);
+    return resumeType ? resumeType.display_name : resumeTypeName;
+  };
 
   useEffect(() => {
     async function fetchSubmissions() {
@@ -205,7 +213,7 @@ export default function SubmissionsPage() {
                         {submission.position_applied_for}
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                        {submission.resume_type}
+                        {getResumeDisplayName(submission.resume_type)}
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                         {new Date(submission.created_at).toLocaleString()}

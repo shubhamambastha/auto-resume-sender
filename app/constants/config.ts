@@ -19,7 +19,7 @@ export const DEFAULT_VALUES = {
     PORT: "587",
   },
   SUPABASE: {
-    URL: "your-supabase-url",
+    URL: "https://your-project-id.supabase.co",
     ANON_KEY: "your-supabase-anon-key",
   },
 } as const;

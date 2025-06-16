@@ -18,8 +18,8 @@ export const getSkillAreaFromResumeType = (resumeType: string): string => {
 
 export const EMAIL_TEMPLATES = {
   APPLICATION: {
-    SUBJECT: (position: string, company: string) =>
-      `Application for ${position} at ${company}`,
+    SUBJECT: (position: string) =>
+      `Application for ${position} || Shubham Ambastha || 5+ Years of Experience`,
 
     BODY: (data: {
       hrName?: string;
@@ -35,9 +35,9 @@ export const EMAIL_TEMPLATES = {
     </head>
     <body>
         <div class="container">
-            <h1>Hi ${
+            <p>Hi ${
               data.hrName && data.hrName !== "" ? data.hrName : "there"
-            },</h1>
+            },</p>
 
             <p>I came across your LinkedIn post about the hiring of a <strong>${
               data.positionAppliedFor

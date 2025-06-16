@@ -92,11 +92,7 @@ export async function sendApplicationEmail(body: FormData) {
         console.warn(WARNING_MESSAGES.UNEXPECTED_CONTENT_TYPE(contentType));
       }
 
-      const filename = FILE_CONSTANTS.RESUME_FILENAME(
-        body.companyName,
-        body.positionAppliedFor,
-        body.resumeType
-      );
+      const filename = FILE_CONSTANTS.RESUME_FILENAME(body.positionAppliedFor);
       const arrayBuffer = await response.arrayBuffer();
 
       if (arrayBuffer.byteLength === 0) {
@@ -133,8 +129,7 @@ export async function sendApplicationEmail(body: FormData) {
 
   // Construct email content with form variables
   const emailSubject = EMAIL_TEMPLATES.APPLICATION.SUBJECT(
-    body.positionAppliedFor,
-    body.companyName
+    body.positionAppliedFor
   );
   const emailText = EMAIL_TEMPLATES.APPLICATION.BODY({
     hrName: body.hrName,

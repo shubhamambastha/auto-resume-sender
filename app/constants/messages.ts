@@ -41,13 +41,6 @@ export const WARNING_MESSAGES = {
 } as const;
 
 export const FILE_CONSTANTS = {
-  RESUME_FILENAME: (
-    companyName: string,
-    position: string,
-    resumeType: string
-  ) =>
-    `${companyName.replace(/[^a-zA-Z0-9]/g, "_")}-${position.replace(
-      /[^a-zA-Z0-9]/g,
-      "_"
-    )}-${resumeType}-Resume.pdf`,
+  RESUME_FILENAME: (position: string) =>
+    `${position.replace(/[^a-zA-Z0-9]/g, "_")}_Shubham_Ambastha_Resume.pdf`,
 } as const;
